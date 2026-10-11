@@ -1,0 +1,7 @@
+{
+  "name": "KAUSHALSAATHI 360",
+  "description": "AI-Enabled Career Counselling and Family Decision-Support Platform for Vocational Education (SIH26241)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

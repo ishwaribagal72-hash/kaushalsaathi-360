@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  kaushalsaathi-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kaushalsaathi-core
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DATABASE_URL=postgresql://kaushal_admin:SecurePass123!@postgres:5432/kaushalsaathi_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - kaushalsaathi-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: kaushalsaathi-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=kaushal_admin
+      - POSTGRES_PASSWORD=SecurePass123!
+      - POSTGRES_DB=kaushalsaathi_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kaushal_admin -d kaushalsaathi_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kaushalsaathi-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: kaushalsaathi-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - kaushalsaathi-network
+
+networks:
+  kaushalsaathi-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:
